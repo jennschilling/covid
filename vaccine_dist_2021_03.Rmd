@@ -13,6 +13,7 @@ library(extrafont)
 library(wesanderson)
 library(ggalluvial)
 library(ggtext)
+library(patchwork)
 
 # Plot Formatting
 font <- "Gill Sans MT"
@@ -80,27 +81,35 @@ dat <- tibble(
 
 ```{r poll-plot}
 
+# poll_plot <-
 ggplot(data = dat,
-       mapping = aes(x = want_vacc_poll + have_vacc_poll,
-                     y = reorder(race, (want_vacc_poll + have_vacc_poll)),
+       mapping = aes(label = scales::percent(want_vacc_poll + have_vacc_poll,
+                                             accuracy = 1),
+                     x = reorder(race, -(want_vacc_poll + have_vacc_poll)),
+                     y = c(0, 0, 0),
                      color = race)) +
-  geom_segment(mapping = aes(xend = 0, yend = race),
-               size = 2) +
-  geom_point(size = 5) +
-  scale_x_continuous(limits = c(0, 1), 
-                     labels = scales::percent,
-                     expand = c(0, 0)) +
+  geom_text(family = font,
+            size = 8,
+            hjust = 0.5) +
+  geom_text(mapping = aes(label = reorder(race, -(want_vacc_poll + have_vacc_poll)),
+                          y = c(-0.2, -0.2, -0.2)),
+            color = fontcolor,
+            family = font,
+            size = 5,
+            hjust = 0.5) +
   scale_color_manual(values = wes_palette("Darjeeling1")) +
+  scale_y_continuous(limits = c(-1, 1)) +
   guides(color = FALSE) +
   labs(title = "Percent of people who plan to get the coronavirus vaccine or have already done so",
-       caption = "**Data:** NPR/PBS NewsHour/Marist Poll of 1,227 National Adults; 3/3/21 - 3/8/21",
+       subtitle = "Based on data from an NPR/PBS NewsHour/Marist Poll of 1,227 National Adults; 3/3/21 - 3/8/21",
        x = "",
        y = "") +
-  theme(axis.line = element_line(color = fontcolor),
-        axis.text.y = element_text(size = 12))
-  
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank())
 
 ```
+
+
 ```{r vacc-plot}
 
 dat_long <-  dat %>% 
@@ -117,6 +126,7 @@ dat_long_labels <- tibble(
   label = c("Black", "Hispanic/\nLatino", "White")
 )
 
+vacc_plot <- 
 ggplot(data = dat_long,
        mapping = aes(y = pct,
                      x = axis,
@@ -147,13 +157,27 @@ ggplot(data = dat_long,
   coord_cartesian(expand = FALSE,
                   clip = "off") +
   labs(title = "Distribution of Vaccinations by Race/Ethnicity compared to the U.S. Population",
-       caption = "**Data:** U.S. Census Bureau, Population Estimates 7/1/2019<br> 
-       CDC, Overall US COVID-19 Vaccine Distribution and Administration 3/12/2021",
+       caption = "**Data:** U.S. Census Bureau, Population Estimates 7/1/2019 | CDC, Overall US COVID-19 Vaccine Distribution and Administration 3/12/2021",
        x = "",
        y = "") +
   theme(axis.text.x = element_text(size = 11),
-        axis.text.y = element_blank(),
-        plot.margin = margin(t = 25, r = 25, b = 10, l = 40))
+        axis.text.y = element_blank())
+
+```
+
+
+```{r combine-plots}
+
+layout <- "AA
+AA
+B#"
+
+vacc_plot / poll_plot + 
+  plot_layout(design = layout) +
+  plot_annotation(title = "Similar proportions of people want the coronavirus\nvaccine but distribution has not been equitable",
+                  caption = "**Design:** Jenn Schilling",
+                  theme = theme(plot.caption = element_markdown(hjust = 1),
+                                plot.title = element_text(size = 18)))
 
 ```
 
