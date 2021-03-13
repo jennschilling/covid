@@ -11,6 +11,8 @@ output: html_document
 library(tidyverse)
 library(extrafont)
 library(wesanderson)
+library(ggalluvial)
+library(ggtext)
 
 # Plot Formatting
 font <- "Gill Sans MT"
@@ -19,6 +21,8 @@ fontcolor <- "gray30"
 theme_set(theme_minimal(base_size = 12, base_family = font))
 
 theme_update(
+  
+  text = element_text(size = 10, color = fontcolor), 
   
   panel.grid.major = element_blank(),
   panel.grid.minor = element_blank(),
@@ -34,7 +38,7 @@ theme_update(
   plot.subtitle = element_text(size = 10, color = fontcolor),
   
   plot.caption.position = "plot",
-  plot.caption = element_text(size = 8, color = fontcolor),
+  plot.caption = element_markdown(size = 8, color = fontcolor, hjust = 0),
   
   plot.margin = margin(t = 25, r = 25, b = 10, l = 25),
   
@@ -89,12 +93,67 @@ ggplot(data = dat,
   scale_color_manual(values = wes_palette("Darjeeling1")) +
   guides(color = FALSE) +
   labs(title = "Percent of people who plan to get the coronavirus vaccine or have already done so",
-       caption = "Source: NPR/PBS NewsHour/Marist Poll of 1,227 National Adults; 3/3/21 - 3/8/21",
+       caption = "**Data:** NPR/PBS NewsHour/Marist Poll of 1,227 National Adults; 3/3/21 - 3/8/21",
        x = "",
        y = "") +
   theme(axis.line = element_line(color = fontcolor),
         axis.text.y = element_text(size = 12))
   
+
+```
+```{r vacc-plot}
+
+dat_long <-  dat %>% 
+  select(race, full_vacc, us_pop) %>%
+  pivot_longer(full_vacc:us_pop,
+               names_to = "axis",
+               values_to = "pct") %>%
+  mutate(axis = factor(axis, levels = c("us_pop", "full_vacc")))
+
+dat_long_labels <- tibble(
+  x = c(0.94, 0.94, 0.94),
+  y = c(0.85, 0.7, 0.3),
+  race = c("Black", "Hispanic/Latino", "White"),
+  label = c("Black", "Hispanic/\nLatino", "White")
+)
+
+ggplot(data = dat_long,
+       mapping = aes(y = pct,
+                     x = axis,
+                     stratum = race,
+                     alluvium = race,
+                     fill = race,
+                     label = scales::percent(pct, accuracy = 0.1))) +
+  geom_alluvium(width = 1/10) +
+  geom_stratum(width = 1/10,
+               alpha = 0.5,
+               color = NA) +
+  geom_text(stat = "stratum",
+            family = font,
+            color = "gray10",
+            size = 3.5) +
+  geom_text(data = dat_long_labels,
+            mapping = aes(x = x,
+                          y = y,
+                          label = label),
+            family = font,
+            color = fontcolor, 
+            size = 4.5,
+            hjust = 1) +
+  scale_fill_manual(values = wes_palette("Darjeeling1")) +
+  scale_x_discrete(labels = c("% of U.S.\nPopulation",
+                              "% of Fully\nVaccinated People")) +
+  guides(fill = FALSE) +
+  coord_cartesian(expand = FALSE,
+                  clip = "off") +
+  labs(title = "Distribution of Vaccinations by Race/Ethnicity compared to the U.S. Population",
+       caption = "**Data:** U.S. Census Bureau, Population Estimates 7/1/2019<br> 
+       CDC, Overall US COVID-19 Vaccine Distribution and Administration 3/12/2021",
+       x = "",
+       y = "") +
+  theme(axis.text.x = element_text(size = 11),
+        axis.text.y = element_blank(),
+        plot.margin = margin(t = 25, r = 25, b = 10, l = 40))
 
 ```
 
