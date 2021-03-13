@@ -1,0 +1,68 @@
+---
+title: "COVID-19 Vaccine Perception and Distribution"
+author: "Jenn Schilling"
+date: "3/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+# Packages
+library(tidyverse)
+library(extrafont)
+
+# Plot Formatting
+font <- "Gill Sans MT"
+fontcolor <- "gray30"
+
+theme_set(theme_minimal(base_size = 12, base_family = font))
+
+theme_update(
+  panel.grid.minor = element_blank(),
+  axis.text = element_text(size = 9, color = fontcolor),
+  
+  legend.title = element_text(size = 12, color = fontcolor),
+  legend.text = element_text(size = 10, color = fontcolor),
+  
+  plot.title.position = "plot",
+  plot.title = element_text(size = 16, face = "bold"),
+  
+  plot.subtitle = element_text(size = 12, color = fontcolor, margin = margin(b = 15)),
+  
+  plot.caption.position = "plot",
+  plot.caption = element_text(size = 7, color = fontcolor),
+  
+  plot.margin = margin(t = 25, r = 25, b = 10, l = 25)
+)
+
+# Data
+
+dat <- tibble(
+  race = c("White", "Black", "Latino"),
+  
+  # Source: http://maristpoll.marist.edu/wp-content/uploads/2021/03/NPR_PBS-NewsHour_Marist-Poll_USA-NOS-and-Tables_202103091124.pdf#page=25
+  # Question: If a vaccine for the coronavirus is made available to you, will you choose to be vaccinated or not? If you have already received the vaccine, please say so.
+  
+  # Response: Yes, will
+  want_vacc_poll = c(0.43, 0.48, 0.52),
+  
+  # Response: Yes, already received
+  have_vacc_poll = c(0.27, 0.25, 0.11),
+  
+  # Source: https://covid.cdc.gov/covid-data-tracker/#vaccination-demographic
+  
+  # Race/Ethnicity of People Fully Vaccinated (3/12/21)
+  # Data from 35,000,159 people fully vaccinated. Race/Ethnicity was available for 18,721,472 (53.5%) people fully vaccinated.
+  full_vacc = c(0.684, 0.066, 0.073),
+  
+  # Race/Ethnicity of People with at least One Dose Administered (3/12/21)
+  # Data from 65,965,305 people with at least one dose administered. Race/Ethnicity was available for 35,139,015 (53.3%) people with at least one dose administered.
+  partial_vacc = c(0.66, 0.073, 0.085),
+  
+  # Source: https://www.census.gov/quickfacts/fact/table/US/PST045219#qf-headnote-b
+  # Population estimates, July 1, 2019
+  us_pop = c(0.601, 0.134, 0.185)
+  
+)
+
+```
