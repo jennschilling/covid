@@ -81,31 +81,35 @@ dat <- tibble(
 
 ```{r poll-plot}
 
-# poll_plot <-
+poll_plot <-
 ggplot(data = dat,
        mapping = aes(label = scales::percent(want_vacc_poll + have_vacc_poll,
                                              accuracy = 1),
-                     x = reorder(race, -(want_vacc_poll + have_vacc_poll)),
+                     x = race,
                      y = c(0, 0, 0),
                      color = race)) +
   geom_text(family = font,
             size = 8,
-            hjust = 0.5) +
-  geom_text(mapping = aes(label = reorder(race, -(want_vacc_poll + have_vacc_poll)),
-                          y = c(-0.2, -0.2, -0.2)),
+            hjust = 0.5,
+            position = position_nudge(y = 0.2)) +
+  geom_text(mapping = aes(label = race,
+                          y = c(-0.15, -0.15, -0.15)),
             color = fontcolor,
             family = font,
             size = 5,
-            hjust = 0.5) +
+            hjust = 0.55,
+            position = position_nudge(y = 0.2)) +
   scale_color_manual(values = wes_palette("Darjeeling1")) +
-  scale_y_continuous(limits = c(-1, 1)) +
+  scale_y_continuous(limits = c(-0.2, 0.3)) +
+  coord_cartesian(clip = "off") +
   guides(color = FALSE) +
   labs(title = "Percent of people who plan to get the coronavirus vaccine or have already done so",
        subtitle = "Based on data from an NPR/PBS NewsHour/Marist Poll of 1,227 National Adults; 3/3/21 - 3/8/21",
        x = "",
        y = "") +
   theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank())
+        axis.text.y = element_blank(),
+        plot.margin = margin(t = 25, r = 25, b = 0, l = 25))
 
 ```
 
@@ -113,15 +117,15 @@ ggplot(data = dat,
 ```{r vacc-plot}
 
 dat_long <-  dat %>% 
-  select(race, full_vacc, us_pop) %>%
+  select(race, full_vacc, partial_vacc, us_pop) %>%
   pivot_longer(full_vacc:us_pop,
                names_to = "axis",
                values_to = "pct") %>%
-  mutate(axis = factor(axis, levels = c("us_pop", "full_vacc")))
+  mutate(axis = factor(axis, levels = c("us_pop", "partial_vacc", "full_vacc")))
 
 dat_long_labels <- tibble(
-  x = c(0.94, 0.94, 0.94),
-  y = c(0.85, 0.7, 0.3),
+  x = c(0.92, 0.92, 0.92),
+  y = c(0.855, 0.7, 0.305),
   race = c("Black", "Hispanic/Latino", "White"),
   label = c("Black", "Hispanic/\nLatino", "White")
 )
@@ -134,8 +138,8 @@ ggplot(data = dat_long,
                      alluvium = race,
                      fill = race,
                      label = scales::percent(pct, accuracy = 0.1))) +
-  geom_alluvium(width = 1/10) +
-  geom_stratum(width = 1/10,
+  geom_alluvium(width = 1/8) +
+  geom_stratum(width = 1/8,
                alpha = 0.5,
                color = NA) +
   geom_text(stat = "stratum",
@@ -152,32 +156,46 @@ ggplot(data = dat_long,
             hjust = 1) +
   scale_fill_manual(values = wes_palette("Darjeeling1")) +
   scale_x_discrete(labels = c("% of U.S.\nPopulation",
+                              "% of Partially and Fully\nVaccinated People",
                               "% of Fully\nVaccinated People")) +
   guides(fill = FALSE) +
   coord_cartesian(expand = FALSE,
                   clip = "off") +
   labs(title = "Distribution of Vaccinations by Race/Ethnicity compared to the U.S. Population",
-       caption = "**Data:** U.S. Census Bureau, Population Estimates 7/1/2019 | CDC, Overall US COVID-19 Vaccine Distribution and Administration 3/12/2021",
+       caption = "Partially vaccinated people have received one of two doses.<br>**Data:** U.S. Census Bureau, Population Estimates 7/1/2019 | CDC, Overall US COVID-19 Vaccine Distribution and Administration 3/12/2021",
        x = "",
        y = "") +
   theme(axis.text.x = element_text(size = 11),
-        axis.text.y = element_blank())
+        axis.text.y = element_blank(),
+        plot.caption = element_markdown(hjust = 0),
+        plot.margin = margin(t = 0, r = 25, b = 10, l = 25))
 
 ```
 
 
 ```{r combine-plots}
 
-layout <- "AA
-AA
-B#"
+layout <- "A
+B
+B
+B
+B
+B"
 
-vacc_plot / poll_plot + 
+combined_plot <- 
+  poll_plot / vacc_plot + 
   plot_layout(design = layout) +
   plot_annotation(title = "Similar proportions of people want the coronavirus\nvaccine but distribution has not been equitable",
                   caption = "**Design:** Jenn Schilling",
-                  theme = theme(plot.caption = element_markdown(hjust = 1),
+                  theme = theme(plot.caption = element_markdown(hjust = 1.1),
                                 plot.title = element_text(size = 18)))
+
+ggsave("covid_vaccine_plot.png",
+       plot = combined_plot,
+       device = "png",
+       width = 8,
+       height = 10,
+       type = "cairo")
 
 ```
 
