@@ -10,6 +10,7 @@ output: html_document
 # Packages
 library(tidyverse)
 library(extrafont)
+library(wesanderson)
 
 # Plot Formatting
 font <- "Gill Sans MT"
@@ -18,27 +19,32 @@ fontcolor <- "gray30"
 theme_set(theme_minimal(base_size = 12, base_family = font))
 
 theme_update(
+  
+  panel.grid.major = element_blank(),
   panel.grid.minor = element_blank(),
-  axis.text = element_text(size = 9, color = fontcolor),
+  
+  axis.text = element_text(size = 10, color = fontcolor),
   
   legend.title = element_text(size = 12, color = fontcolor),
   legend.text = element_text(size = 10, color = fontcolor),
   
   plot.title.position = "plot",
-  plot.title = element_text(size = 16, face = "bold"),
+  plot.title = element_text(size = 12, face = "bold"),
   
-  plot.subtitle = element_text(size = 12, color = fontcolor, margin = margin(b = 15)),
+  plot.subtitle = element_text(size = 10, color = fontcolor),
   
   plot.caption.position = "plot",
-  plot.caption = element_text(size = 7, color = fontcolor),
+  plot.caption = element_text(size = 8, color = fontcolor),
   
-  plot.margin = margin(t = 25, r = 25, b = 10, l = 25)
+  plot.margin = margin(t = 25, r = 25, b = 10, l = 25),
+  
+  plot.background = element_rect(fill = "#F0F0F0", color = NA)
 )
 
 # Data
 
 dat <- tibble(
-  race = c("White", "Black", "Latino"),
+  race = c("White", "Black", "Hispanic/Latino"),
   
   # Source: http://maristpoll.marist.edu/wp-content/uploads/2021/03/NPR_PBS-NewsHour_Marist-Poll_USA-NOS-and-Tables_202103091124.pdf#page=25
   # Question: If a vaccine for the coronavirus is made available to you, will you choose to be vaccinated or not? If you have already received the vaccine, please say so.
@@ -66,3 +72,29 @@ dat <- tibble(
 )
 
 ```
+
+
+```{r poll-plot}
+
+ggplot(data = dat,
+       mapping = aes(x = want_vacc_poll + have_vacc_poll,
+                     y = reorder(race, (want_vacc_poll + have_vacc_poll)),
+                     color = race)) +
+  geom_segment(mapping = aes(xend = 0, yend = race),
+               size = 2) +
+  geom_point(size = 5) +
+  scale_x_continuous(limits = c(0, 1), 
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  scale_color_manual(values = wes_palette("Darjeeling1")) +
+  guides(color = FALSE) +
+  labs(title = "Percent of people who plan to get the coronavirus vaccine or have already done so",
+       caption = "Source: NPR/PBS NewsHour/Marist Poll of 1,227 National Adults; 3/3/21 - 3/8/21",
+       x = "",
+       y = "") +
+  theme(axis.line = element_line(color = fontcolor),
+        axis.text.y = element_text(size = 12))
+  
+
+```
+
