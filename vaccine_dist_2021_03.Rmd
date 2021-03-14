@@ -43,7 +43,7 @@ theme_update(
   
   plot.margin = margin(t = 25, r = 25, b = 10, l = 25),
   
-  plot.background = element_rect(fill = "#F0F0F0", color = NA)
+  plot.background = element_rect(fill = "#fafafa", color = NA)
 )
 
 # Data
