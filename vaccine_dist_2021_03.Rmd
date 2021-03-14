@@ -99,7 +99,7 @@ ggplot(data = dat,
             size = 5,
             hjust = 0.55,
             position = position_nudge(y = 0.2)) +
-  scale_color_brewer(palette = "Set2") +
+  scale_color_brewer(palette = "Dark2") +
   scale_y_continuous(limits = c(-0.2, 0.3)) +
   coord_cartesian(clip = "off") +
   guides(color = FALSE) +
