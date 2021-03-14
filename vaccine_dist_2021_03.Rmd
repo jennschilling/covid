@@ -99,7 +99,7 @@ ggplot(data = dat,
             size = 5,
             hjust = 0.55,
             position = position_nudge(y = 0.2)) +
-  scale_color_manual(values = wes_palette("Darjeeling1")) +
+  scale_color_brewer(palette = "Set2") +
   scale_y_continuous(limits = c(-0.2, 0.3)) +
   coord_cartesian(clip = "off") +
   guides(color = FALSE) +
@@ -154,7 +154,7 @@ ggplot(data = dat_long,
             color = fontcolor, 
             size = 4.5,
             hjust = 1) +
-  scale_fill_manual(values = wes_palette("Darjeeling1")) +
+  scale_fill_brewer(palette = "Set2") +
   scale_x_discrete(labels = c("% of U.S.\nPopulation",
                               "% of Partially and Fully\nVaccinated People",
                               "% of Fully\nVaccinated People")) +
