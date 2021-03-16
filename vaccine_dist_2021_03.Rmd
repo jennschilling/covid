@@ -154,7 +154,7 @@ ggplot(data = dat_long,
             color = fontcolor, 
             size = 4.5,
             hjust = 1) +
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Dark2") +
   scale_x_discrete(labels = c("% of U.S.\nPopulation",
                               "% of Partially and Fully\nVaccinated People",
                               "% of Fully\nVaccinated People")) +
@@ -175,16 +175,10 @@ ggplot(data = dat_long,
 
 ```{r combine-plots}
 
-layout <- "A
-B
-B
-B
-B
-B"
-
 combined_plot <- 
   poll_plot / vacc_plot + 
-  plot_layout(design = layout) +
+  plot_layout(ncol = 1,
+              heights = c(1, 5)) +
   plot_annotation(title = "Similar proportions of people want the coronavirus\nvaccine but distribution has not been equitable",
                   caption = "**Design:** Jenn Schilling",
                   theme = theme(plot.caption = element_markdown(hjust = 1.1),
