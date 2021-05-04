@@ -1,0 +1,141 @@
+---
+title: "COVID-19 Vaccine Perception and Distribution"
+author: "Jenn Schilling"
+date: "5/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+# Packages
+library(tidyverse)
+library(extrafont)
+library(ggalluvial)
+library(ggtext)
+
+# Plot Formatting
+font <- "Gill Sans MT"
+fontcolor <- "gray30"
+
+theme_set(theme_minimal(base_size = 12, base_family = font))
+
+theme_update(
+  
+  text = element_text(size = 10, color = fontcolor), 
+  
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  
+  axis.text = element_text(size = 10, color = fontcolor),
+  
+  legend.title = element_text(size = 12, color = fontcolor),
+  legend.text = element_text(size = 10, color = fontcolor),
+  
+  #plot.title.position = "plot",
+  plot.title = element_markdown(size = 16, face = "bold", hjust = 1.75),
+  
+  #plot.caption.position = "plot",
+  plot.caption = element_markdown(size = 8, color = fontcolor, hjust = 1),
+  
+  plot.background = element_rect(fill = "#fafafa", color = NA)
+)
+
+# Data
+
+dat <- tibble(
+  race = c("White", "Asian", "American Indian/Alaska Native", "Black", "Hispanic/Latino", "Native Hawaiian/Other Pacific Islander", "Two or More Races"),
+  
+  # Source: https://covid.cdc.gov/covid-data-tracker/#vaccination-demographic
+  
+  # Race/Ethnicity of People Fully Vaccinated (5/3/21)
+  # Data from 105,523,520 people fully vaccinated. Race/Ethnicity was available for 61,455,857 (58.2%) people fully vaccinated.
+  full_vacc = c(0.671, 0.048, 0.011, 0.085, 0.102, 0.003, 0.08),
+  
+  # Race/Ethnicity of People with at least One Dose Administered (5/3/21)
+  # Data from 147,517,734 people with at least one dose administered. Race/Ethnicity was available for 81,723,337 (55.4%) people with at least one dose administered.
+  partial_vacc = c(0.634, 0.058, 0.011, 0.087, 0.125, 0.003, 0.083),
+  
+  # Percentage of the US Population in this Demographic Category
+  us_pop = c(0.612, 0.058, 0.008, 0.124, 0.172, 0.003, 0.023)
+  
+)
+
+```
+
+
+```{r vacc-plot}
+
+dat_long <-  dat %>% 
+  select(race, full_vacc, partial_vacc, us_pop) %>%
+  pivot_longer(full_vacc:us_pop,
+               names_to = "axis",
+               values_to = "pct") %>%
+  mutate(axis = factor(axis, levels = c("us_pop", "partial_vacc", "full_vacc")))
+
+dat_long_labels <- tibble(
+  x = c(0.93, 0.93, 0.93, 0.93, 0.93, 0.93, 0.93),
+  y = c(0.875, 0.73, 0.31, 0.965, 0.625, 1, 0.645),
+  race = c("Black", "Hispanic/Latino", "White", "Asian", "Two or More Races",
+           "American Indian/Alaska Native", "Native Hawaiian/Other Pacific Islander"),
+  label = c("Black", "Hispanic/Latino", "White", "Asian", "Two or More Races",
+           "American Indian/Alaska Native", "Native Hawaiian/Other Pacific Islander")
+)
+
+vacc_plot <- 
+ggplot(data = dat_long,
+       mapping = aes(y = pct,
+                     x = axis,
+                     stratum = race,
+                     alluvium = race,
+                     fill = race,
+                     label = scales::percent(pct, accuracy = 0.1))) +
+  geom_alluvium(width = 1/8) +
+  geom_stratum(width = 1/8,
+               alpha = 0.5,
+               color = NA) +
+  geom_text(stat = "stratum",
+            family = font,
+            color = "gray10",
+            size = 3.5) +
+  geom_text(data = dat_long_labels,
+            mapping = aes(x = x,
+                          y = y,
+                          label = label),
+            family = font,
+            color = fontcolor,
+            size = 4,
+            hjust = 1) +
+ # scale_fill_brewer(palette = "Dark2") +
+  scale_x_discrete(labels = c("% of U.S.\nPopulation",
+                              "% of Partially and Fully\nVaccinated People",
+                              "% of Fully\nVaccinated People"),
+                   position = "top") +
+  guides(fill = FALSE) +
+  coord_cartesian(expand = FALSE,
+                  clip = "off") +
+  labs(title = "Distribution of vaccinations by race/ethnicity compared to the U.S. population<br><br>",
+       caption = "Partially vaccinated people have received one of two doses.<br>
+       The proportions for each race represent people who do not identify as Hispanic/Latino.<br>
+       **Data:** CDC, Demographic Characteristics of People Receiving COVID-19 Vaccinations in the United States, 5/3/2021",
+       fill = "Race/Ethnicity",
+       x = "",
+       y = "") +
+  theme(axis.text.x = element_text(size = 11),
+        axis.text.y = element_blank(),
+        plot.margin = margin(t = 25, r = 50, b = 25, l = 165),
+        legend.position = "right")
+
+```
+
+
+```{r save-plot}
+
+ggsave("covid_vaccine_plot_may.png",
+       plot = vacc_plot,
+       device = "png",
+       width = 10,
+       height = 10,
+       type = "cairo")
+
+```
+
