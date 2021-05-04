@@ -116,7 +116,7 @@ ggplot(data = dat_long,
   labs(title = "Distribution of vaccinations by race/ethnicity compared to the U.S. population<br><br>",
        caption = "Partially vaccinated people have received one of two doses.<br>
        The proportions for each race represent people who do not identify as Hispanic/Latino.<br>
-       **Data:** CDC, Demographic Characteristics of People Receiving COVID-19 Vaccinations in the United States, 5/3/2021",
+       **Data:** CDC, Demographic Characteristics of People Receiving COVID-19 Vaccinations in the United States, 5/3/2021 **Design:** Jenn Schilling",
        fill = "Race/Ethnicity",
        x = "",
        y = "") +
